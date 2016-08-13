@@ -9,14 +9,11 @@ namespace Armenio\Authentication\Adapter\DbTable;
 
 use Armenio\Authentication\Adapter\DbTable\CallbackCheckAdapter as AuthAdapter;
 use Armenio\Authentication\Storage\Session as AuthStorage;
-use Cake\Core\Configure;
 use Interop\Container\ContainerInterface;
 use Zend\Authentication\AuthenticationService;
 use Zend\Crypt\Password\Bcrypt;
 use Zend\Db\Adapter as DbAdapter;
 use Zend\ServiceManager\Factory\FactoryInterface;
-use Zend\Session\Container as SessionContainer;
-
 
 /**
  * Class CallbackCheckAdapterFactory
@@ -26,15 +23,14 @@ class CallbackCheckAdapterFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
-     * @param string $name
+     * @param $name
      * @param array|null $options
      * @return AuthenticationService
      */
     public function __invoke(ContainerInterface $container, $name, array $options = null)
     {
         // new storage
-        $session = $container->get(SessionContainer::class);
-        $authStorage = new AuthStorage(null, null, $session->getManager());
+        $authStorage = new AuthStorage();
 
         // get db to setup adapter
         $db = $container->get(DbAdapter::class);
