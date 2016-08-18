@@ -14,6 +14,7 @@ use Zend\Authentication\AuthenticationService;
 use Zend\Crypt\Password\Bcrypt;
 use Zend\Db\Adapter as DbAdapter;
 use Zend\ServiceManager\Factory\FactoryInterface;
+use Zend\Session\Container as SessionContainer;
 
 /**
  * Class CallbackCheckAdapterFactory
@@ -23,17 +24,17 @@ class CallbackCheckAdapterFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
-     * @param $name
+     * @param string $name
      * @param array|null $options
      * @return AuthenticationService
      */
     public function __invoke(ContainerInterface $container, $name, array $options = null)
     {
-        // new storage
-        $authStorage = new AuthStorage();
-
-        // get db to setup adapter
+        $session = $container->get(SessionContainer::class);
         $db = $container->get(DbAdapter::class);
+
+        // new storage
+        $authStorage = new AuthStorage(null, null, $session->getManager());
 
         $tableName = null;
         $identityColumn = null;
