@@ -16,9 +16,4 @@ return [
             AuthenticationService::class => AuthenticationServiceFactory::class,
         ],
     ],
-    'controller_plugins' => [
-        'factories' => [
-            'authentication' => Controller\Plugin\AuthenticationFactory::class,
-        ],
-    ],
 ];
