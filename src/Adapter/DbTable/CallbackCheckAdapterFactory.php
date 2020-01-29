@@ -1,8 +1,8 @@
 <?php
 /**
- * Rafael Armenio <rafael.armenio@gmail.com>
+ * @author Rafael Armenio <rafael.armenio@gmail.com>
  *
- * @link http://github.com/armenio for the source repository
+ * @link http://github.com/armenio
  */
 
 namespace Armenio\Authentication\Adapter\DbTable;
@@ -12,7 +12,7 @@ use Armenio\Authentication\Storage\Session as AuthStorage;
 use Interop\Container\ContainerInterface;
 use Zend\Authentication\AuthenticationService;
 use Zend\Crypt\Password\Bcrypt;
-use Zend\Db\Adapter as DbAdapter;
+use Zend\Db\Adapter as ZendDbAdapter;
 use Zend\ServiceManager\Factory\FactoryInterface;
 use Zend\Session\Container as SessionContainer;
 
@@ -26,12 +26,12 @@ class CallbackCheckAdapterFactory implements FactoryInterface
      * @param ContainerInterface $container
      * @param string $name
      * @param array|null $options
-     * @return AuthenticationService
+     * @return object|AuthenticationService
      */
     public function __invoke(ContainerInterface $container, $name, array $options = null)
     {
         $session = $container->get(SessionContainer::class);
-        $db = $container->get(DbAdapter::class);
+        $zendDbAdapter = $container->get(ZendDbAdapter::class);
 
         // new storage
         $authStorage = new AuthStorage(null, null, $session->getManager());
@@ -46,8 +46,11 @@ class CallbackCheckAdapterFactory implements FactoryInterface
         $joinTables = [];
 
         $config = $container->get('config');
-        if (isset($config['authentication'])) {
+
+        if (!empty($config['authentication'])) {
+
             $authentication = $config['authentication'];
+
             $tableName = $authentication['table_name'];
             $identityColumn = $authentication['identity_column'];
             $credentialColumn = $authentication['credential_column'];
@@ -58,7 +61,7 @@ class CallbackCheckAdapterFactory implements FactoryInterface
         }
 
         // new adapter
-        $authAdapter = new AuthAdapter($db, $tableName, $identityColumn, $credentialColumn);
+        $authAdapter = new AuthAdapter($zendDbAdapter, $tableName, $identityColumn, $credentialColumn);
         $authAdapter->setCredentialValidationCallback(function ($dbCredential, $requestCredential) use ($cryptCost) {
             $bcrypt = new Bcrypt();
             $bcrypt->setCost($cryptCost);
@@ -70,6 +73,7 @@ class CallbackCheckAdapterFactory implements FactoryInterface
 
         // start the service
         $authService = new AuthenticationService($authStorage, $authAdapter);
+
         return $authService;
     }
 }
