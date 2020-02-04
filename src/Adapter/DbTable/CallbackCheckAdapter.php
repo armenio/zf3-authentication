@@ -2,7 +2,7 @@
 /**
  * Rafael Armenio <rafael.armenio@gmail.com>
  *
- * @link http://github.com/armenio for the source repository
+ * @link http://github.com/armenio
  */
 
 namespace Armenio\Authentication\Adapter\DbTable;
@@ -11,6 +11,10 @@ use Zend\Authentication\Adapter\DbTable\CallbackCheckAdapter as ZendCallbackChec
 use Zend\Authentication\Adapter\DbTable\Exception;
 use Zend\Db\Sql\Select;
 
+/**
+ * Class CallbackCheckAdapter
+ * @package Armenio\Authentication\Adapter\DbTable
+ */
 class CallbackCheckAdapter extends ZendCallbackCheckAdapter
 {
     /**
@@ -30,6 +34,7 @@ class CallbackCheckAdapter extends ZendCallbackCheckAdapter
     public function setCheckIsActive($checkIsActive)
     {
         $this->checkIsActive = $checkIsActive;
+
         return $this;
     }
 
@@ -62,23 +67,24 @@ class CallbackCheckAdapter extends ZendCallbackCheckAdapter
      */
     public function addJoinTable($joinTable)
     {
-        if (!isset($joinTable['name'])) {
+        if (empty($joinTable['name'])) {
             throw new Exception\InvalidArgumentException('Invalid Join Table Name');
         }
 
-        if (!isset($joinTable['on'])) {
+        if (empty($joinTable['on'])) {
             $joinTable['on'] = sprintf('%s.id = %s.%s_id', $joinTable['name'], $this->tableName, $joinTable['name']);
         }
 
-        if (!isset($joinTable['columns'])) {
+        if (empty($joinTable['columns'])) {
             $joinTable['columns'] = Select::SQL_STAR;
         }
 
-        if (!isset($joinTable['type'])) {
+        if (empty($joinTable['type'])) {
             $joinTable['type'] = Select::JOIN_INNER;
         }
 
         $this->joinTables[] = $joinTable;
+
         return $this;
     }
 
@@ -106,15 +112,19 @@ class CallbackCheckAdapter extends ZendCallbackCheckAdapter
 
         $joinTables = $this->getJoinTables();
 
-        if (!empty($joinTables)) {
-            foreach ($joinTables as $joinTable) {
-                if (!empty($joinTable['name'])) {
-                    $dbSelect->join($joinTable['name'], $joinTable['on'], $joinTable['columns'], $joinTable['type']);
+        if (empty($joinTables)) {
+            throw new Exception\RuntimeException('Empty Join Tables');
+        }
 
-                    if ($this->getCheckIsActive() === true) {
-                        $dbSelect->where([sprintf('%s.active', $joinTable['name']) => 1]);
-                    }
-                }
+        foreach ($joinTables as $joinTable) {
+            if (!empty($joinTable['name'])) {
+                continue;
+            }
+
+            $dbSelect->join($joinTable['name'], $joinTable['on'], $joinTable['columns'], $joinTable['type']);
+
+            if (true === $this->getCheckIsActive()) {
+                $dbSelect->where([sprintf('%s.active', $joinTable['name']) => 1]);
             }
         }
 

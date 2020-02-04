@@ -33,43 +33,32 @@ class CallbackCheckAdapterFactory implements FactoryInterface
         $session = $container->get(SessionContainer::class);
         $zendDbAdapter = $container->get(ZendDbAdapter::class);
 
-        // new storage
-        $authStorage = new AuthStorage(null, null, $session->getManager());
-
-        $tableName = null;
-        $identityColumn = null;
-        $credentialColumn = null;
-        $credentialTreatment = null;
-
-        $cryptCost = 14;
-        $checkIsActive = true;
-        $joinTables = [];
-
         $config = $container->get('config');
 
-        if (!empty($config['authentication'])) {
-
-            $authentication = $config['authentication'];
-
-            $tableName = $authentication['table_name'];
-            $identityColumn = $authentication['identity_column'];
-            $credentialColumn = $authentication['credential_column'];
-
-            $cryptCost = $authentication['crypt_cost'];
-            $checkIsActive = $authentication['check_is_active'];
-            $joinTables = $authentication['join_tables'];
-        }
+        $tableName = isset($config['authentication']['table_name']) ? $config['authentication']['table_name'] : 'authentication';
+        $identityColumn = isset($config['authentication']['identity_column']) ? $config['authentication']['identity_column'] : 'identity';
+        $credentialColumn = isset($config['authentication']['credential_column']) ? $config['authentication']['credential_column'] : 'credential';
 
         // new adapter
         $authAdapter = new AuthAdapter($zendDbAdapter, $tableName, $identityColumn, $credentialColumn);
+
+        $cryptCost = isset($config['authentication']['crypt_cost']) ? $config['authentication']['crypt_cost'] : 10;
+
         $authAdapter->setCredentialValidationCallback(function ($dbCredential, $requestCredential) use ($cryptCost) {
             $bcrypt = new Bcrypt();
             $bcrypt->setCost($cryptCost);
 
             return $bcrypt->verify($requestCredential, $dbCredential);
         });
+
+        $checkIsActive = isset($config['authentication']['check_is_active']) ? $config['authentication']['check_is_active'] : false;
+        $joinTables = isset($config['authentication']['join_tables']) ? $config['authentication']['join_tables'] : [];
+
         $authAdapter->setCheckIsActive($checkIsActive);
         $authAdapter->setJoinTables($joinTables);
+
+        // new storage
+        $authStorage = new AuthStorage(null, null, $session->getManager());
 
         // start the service
         $authService = new AuthenticationService($authStorage, $authAdapter);

@@ -2,7 +2,7 @@
 /**
  * Rafael Armenio <rafael.armenio@gmail.com>
  *
- * @link http://github.com/armenio for the source repository
+ * @link http://github.com/armenio
  */
 
 namespace Armenio\Authentication\Storage;
@@ -34,6 +34,7 @@ class Session extends ZendAuthenticationStorageSession
     public function rememberMe($ttl = 30 * 24 * 60 * 60)
     {
         $this->getManager()->rememberMe($ttl);
+
         return $this;
     }
 
@@ -47,6 +48,7 @@ class Session extends ZendAuthenticationStorageSession
     public function forgetMe()
     {
         $this->getManager()->forgetMe();
+
         return $this;
     }
 }

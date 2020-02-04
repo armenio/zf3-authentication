@@ -2,11 +2,15 @@
 /**
  * Rafael Armenio <rafael.armenio@gmail.com>
  *
- * @link http://github.com/armenio for the source repository
+ * @link http://github.com/armenio
  */
 
 namespace Armenio\Authentication;
 
+/**
+ * Class Module
+ * @package Armenio\Authentication
+ */
 class Module
 {
     /**
