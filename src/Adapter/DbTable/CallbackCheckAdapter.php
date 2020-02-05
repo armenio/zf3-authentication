@@ -105,6 +105,7 @@ class CallbackCheckAdapter extends ZendCallbackCheckAdapter
         $dbSelect = parent::authenticateCreateSelect();
 
         $checkIsActive = $this->getCheckIsActive();
+
         if (true === $checkIsActive) {
             $tableName = $this->tableName;
             $dbSelect->where([sprintf('%s.active', $tableName) => 1]);
@@ -112,19 +113,13 @@ class CallbackCheckAdapter extends ZendCallbackCheckAdapter
 
         $joinTables = $this->getJoinTables();
 
-        if (empty($joinTables)) {
-            throw new Exception\RuntimeException('Empty Join Tables');
-        }
+        if (!empty($joinTables)) {
+            foreach ($joinTables as $joinTable) {
+                $dbSelect->join($joinTable['name'], $joinTable['on'], $joinTable['columns'], $joinTable['type']);
 
-        foreach ($joinTables as $joinTable) {
-            if (!empty($joinTable['name'])) {
-                continue;
-            }
-
-            $dbSelect->join($joinTable['name'], $joinTable['on'], $joinTable['columns'], $joinTable['type']);
-
-            if (true === $this->getCheckIsActive()) {
-                $dbSelect->where([sprintf('%s.active', $joinTable['name']) => 1]);
+                if (true === $checkIsActive) {
+                    $dbSelect->where([sprintf('%s.active', $joinTable['name']) => 1]);
+                }
             }
         }
 
