@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Rafael Armenio <rafael.armenio@gmail.com>
  *
@@ -9,6 +10,7 @@ namespace Armenio\Authentication;
 
 /**
  * Class Module
+ *
  * @package Armenio\Authentication
  */
 class Module
